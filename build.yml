@@ -1,35 +1,38 @@
-name: Build ACE APK
+name: Build Android APK
 
 on:
-  workflow_dispatch:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
+    - name: Extract ZIP file
+      run: |
+        mkdir -p Ace
+        unzip -q ACE-Android-phone-build.zip -d Ace/
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
 
-      - name: Build ACE APK
-        working-directory: ACE-Android
-        run: gradle assembleDebug
+    - name: Build with Gradle
+      working-directory: ./Ace
+      run: |
+        chmod +x gradlew
+        ./gradlew assembleDebug
 
-      - name: Upload ACE APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: ACE-debug-apk
-          path: ACE-Android/app/build/outputs/apk/debug/app-debug.apk
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug
+        path: Ace/app/build/outputs/apk/debug/app-debug.apk
+
